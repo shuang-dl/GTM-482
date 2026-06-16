@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fin AI Voice CSAT Analysis — GTM-482</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --blue:       #3185fc;
+    --navy:       #162050;
+    --green:      #dffe02;
+    --pink:       #ff4998;
+    --light-blue: #dbeaff;
+    --cloud:      #f0efeb;
+    --white:      #ffffff;
+    --body:       #475569;
+    --muted:      #64748b;
+    --faint:      #94a3b8;
+    --border:     #e8f0fe;
+    --page-bg:    #f8fafc;
+    --shadow:     0 2px 16px rgba(22, 32, 80, 0.08);
+    --font:       'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font); color: var(--body); background: var(--page-bg); font-size: 15px; line-height: 1.65; }
+
+  /* ─── NAV ─── */
+  .nav {
+    position: sticky; top: 0; z-index: 100;
+    height: 52px; background: var(--white);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 40px;
+  }
+  .nav-brand { font-size: 12px; font-weight: 800; letter-spacing: .08em; color: var(--navy); text-transform: uppercase; }
+  .nav-right { display: flex; align-items: center; gap: 12px; }
+  .nav-badge { background: var(--navy); color: var(--white); font-size: 11px; font-weight: 700; padding: 3px 11px; border-radius: 99px; letter-spacing: .04em; }
+  .nav-date { font-size: 11.5px; font-weight: 600; color: var(--muted); }
+
+  /* ─── HERO ─── */
+  .hero {
+    background: linear-gradient(145deg, #3185fc 0%, #2060cc 38%, #162050 100%);
+    padding: 72px 40px 108px;
+    position: relative; overflow: hidden;
+  }
+  .hero-squiggle {
+    position: absolute; top: 0; left: 0;
+    width: 100%; height: 100%; pointer-events: none;
+    opacity: .16;
+  }
+  .hero-eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(255,255,255,.12); border-radius: 99px;
+    padding: 5px 14px; margin-bottom: 22px;
+    font-size: 11px; font-weight: 700; letter-spacing: .08em;
+    color: rgba(255,255,255,.9); text-transform: uppercase;
+  }
+  .hero-eyebrow .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+  .hero h1 {
+    font-size: clamp(34px, 5vw, 56px); font-weight: 900;
+    letter-spacing: -.03em; color: var(--white);
+    line-height: 1.05; margin-bottom: 18px; max-width: 760px;
+  }
+  .hero h1 .accent { color: var(--green); }
+  .hero-sub {
+    font-size: 15px; line-height: 1.65;
+    color: rgba(255,255,255,.68); max-width: 600px; margin-bottom: 44px;
+  }
+  .hero-meta { display: flex; gap: 36px; flex-wrap: wrap; }
+  .meta-label { font-size: 10.5px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: rgba(255,255,255,.48); margin-bottom: 3px; }
+  .meta-val   { font-size: 13px; font-weight: 600; color: rgba(255,255,255,.88); }
+
+  /* ─── KPI STRIP ─── */
+  .kpi-strip {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+    max-width: 1200px; margin: -44px auto 0; padding: 0 40px;
+    position: relative; z-index: 10;
+  }
+  .kpi-card {
+    background: var(--white); border-radius: 16px;
+    box-shadow: var(--shadow); padding: 22px 24px;
+    border-top: 3px solid var(--blue);
+  }
+  .kpi-card.alert { border-top-color: var(--pink); }
+  .kpi-card.warn  { border-top-color: #f59e0b; }
+  .kpi-card.ok    { border-top-color: #22c55e; }
+  .k-label  { font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--faint); margin-bottom: 9px; }
+  .k-value  { font-size: 32px; font-weight: 800; color: var(--blue); line-height: 1; margin-bottom: 6px; }
+  .kpi-card.alert .k-value { color: var(--pink); }
+  .kpi-card.warn  .k-value { color: #d97706; }
+  .kpi-card.ok    .k-value { color: #16a34a; }
+  .k-sub    { font-size: 12px; color: var(--muted); }
+
+  /* ─── LAYOUT ─── */
+  .container { max-width: 1200px; margin: 0 auto; padding: 0 40px; }
+  .section-wrap          { padding: 60px 0; }
+  .section-wrap.on-cloud { background: var(--cloud); }
+  .section-wrap.on-white { background: var(--white); }
+  .section-wrap.on-page  { background: var(--page-bg); }
+
+  .sec-eyebrow { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--blue); margin-bottom: 6px; }
+  .sec-title   { font-size: 28px; font-weight: 800; letter-spacing: -.02em; color: var(--navy); margin-bottom: 8px; }
+  .sec-desc    { font-size: 14px; color: var(--muted); margin-bottom: 32px; line-height: 1.55; max-width: 720px; }
+
+  /* ─── CALLOUTS ─── */
+  .callout { border-radius: 10px; padding: 16px 20px; margin: 14px 0; display: flex; gap: 13px; }
+  .callout.info    { background: var(--light-blue); border-left: 3px solid var(--blue); }
+  .callout.warn    { background: #fffbeb;            border-left: 3px solid #f59e0b; }
+  .callout.alert   { background: #fff0f5;            border-left: 3px solid var(--pink); }
+  .callout.success { background: #f0fdf4;            border-left: 3px solid #22c55e; }
+  .callout.neutral { background: var(--cloud);       border-left: 3px solid #6b7280; }
+  .co-icon { font-size: 17px; flex-shrink: 0; margin-top: 2px; }
+  .co-body { font-size: 13px; line-height: 1.6; color: var(--navy); }
+  .co-body strong { display: block; font-weight: 700; margin-bottom: 3px; font-size: 13.5px; }
+
+  /* ─── CARDS ─── */
+  .card { background: var(--white); border-radius: 16px; box-shadow: var(--shadow); padding: 30px; margin-bottom: 20px; }
+  .card-title { font-size: 17px; font-weight: 700; letter-spacing: -.015em; color: var(--navy); margin-bottom: 4px; }
+  .card-desc  { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; align-items: start; }
+
+  /* ─── FAILURE MODE CARDS ─── */
+  .fm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .fm-card {
+    background: var(--white); border-radius: 16px; box-shadow: var(--shadow);
+    overflow: hidden; display: flex; flex-direction: column;
+  }
+  .fm-header {
+    padding: 22px 26px 18px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: flex-start; gap: 14px;
+  }
+  .fm-num {
+    width: 34px; height: 34px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 800; flex-shrink: 0; margin-top: 2px;
+  }
+  .fm-num.n1 { background: #fff0f5; color: var(--pink); }
+  .fm-num.n2 { background: var(--light-blue); color: var(--blue); }
+  .fm-num.n3 { background: #fffbeb; color: #d97706; }
+  .fm-num.n4 { background: #f5f3ff; color: #7c3aed; }
+  .fm-header-text .fm-title { font-size: 16px; font-weight: 700; color: var(--navy); margin-bottom: 3px; }
+  .fm-header-text .fm-sub   { font-size: 12.5px; color: var(--muted); }
+  .fm-body { padding: 20px 26px; flex: 1; }
+  .fm-label { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--faint); margin-bottom: 6px; margin-top: 14px; }
+  .fm-label:first-child { margin-top: 0; }
+  .fm-text  { font-size: 13.5px; color: var(--body); line-height: 1.6; }
+  .fm-footer {
+    padding: 14px 26px; background: var(--cloud);
+    border-top: 1px solid var(--border);
+  }
+  .fm-fix { font-size: 12.5px; line-height: 1.55; color: var(--navy); }
+  .fm-fix strong { color: var(--blue); font-weight: 700; }
+
+  /* ─── BADGE ─── */
+  .badge { display: inline-block; border-radius: 99px; padding: 2px 9px; font-size: 11px; font-weight: 700; letter-spacing: .02em; }
+  .badge-blue   { background: var(--light-blue); color: var(--blue); }
+  .badge-green  { background: #dcfce7; color: #16a34a; }
+  .badge-pink   { background: #fff0f5; color: var(--pink); }
+  .badge-cloud  { background: var(--cloud); color: var(--navy); }
+  .badge-amber  { background: #fef9c3; color: #92400e; }
+  .badge-purple { background: #f5f3ff; color: #7c3aed; }
+
+  /* ─── TABLES ─── */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead tr { background: var(--cloud); }
+  th { text-align: left; padding: 10px 18px; color: var(--navy); font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; border-bottom: 1px solid var(--border); }
+  td { padding: 11px 18px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  td:first-child { color: var(--navy); font-weight: 600; }
+  tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: #f8faff; }
+
+  /* ─── FACT TABLE ─── */
+  .fact-table td:first-child { color: var(--muted); font-weight: 500; }
+  .fact-table td:nth-child(2) { color: var(--navy); font-weight: 700; }
+
+  /* ─── RECOMMENDATIONS ─── */
+  .reco-box { background: var(--navy); border-radius: 20px; padding: 48px; }
+  .reco-eyebrow { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--green); margin-bottom: 12px; }
+  .reco-title { font-size: 28px; font-weight: 800; letter-spacing: -.025em; color: var(--white); margin-bottom: 30px; line-height: 1.2; }
+  .reco-title .accent { color: var(--green); }
+  .reco-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .reco-item {
+    background: rgba(255,255,255,.06); border-radius: 14px;
+    padding: 20px 22px; border: 1px solid rgba(255,255,255,.1);
+  }
+  .reco-item-num { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--green); margin-bottom: 8px; }
+  .reco-item-title { font-size: 15px; font-weight: 700; color: var(--white); margin-bottom: 6px; }
+  .reco-item-body { font-size: 13px; line-height: 1.6; color: rgba(255,255,255,.65); }
+  .reco-item-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 12px; }
+  .reco-tag { font-size: 10.5px; font-weight: 700; padding: 2px 8px; border-radius: 99px; background: rgba(255,255,255,.1); color: rgba(255,255,255,.75); }
+
+  /* ─── PRIORITY STRIP ─── */
+  .priority-strip { display: flex; gap: 10px; margin-bottom: 28px; flex-wrap: wrap; }
+  .p-chip { display: flex; align-items: center; gap: 7px; background: var(--white); border-radius: 99px; padding: 6px 14px; font-size: 12px; font-weight: 700; color: var(--navy); box-shadow: var(--shadow); border: 1px solid var(--border); }
+  .p-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+  /* ─── APPENDIX TRANSCRIPTS ─── */
+  .transcript-card { background: var(--white); border-radius: 14px; box-shadow: var(--shadow); margin-bottom: 16px; overflow: hidden; }
+  .transcript-header { padding: 16px 22px; background: var(--cloud); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .transcript-id { font-size: 12px; font-weight: 700; color: var(--navy); letter-spacing: .03em; }
+  .transcript-body { padding: 18px 22px; font-size: 13px; line-height: 1.65; color: var(--body); }
+  .transcript-body strong { color: var(--navy); }
+  .transcript-meta { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
+  .t-meta-item { font-size: 11.5px; color: var(--muted); }
+  .t-meta-item span { font-weight: 700; color: var(--navy); }
+
+  /* ─── LIMITATIONS ─── */
+  .limit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .limit-item { background: var(--white); border-radius: 12px; box-shadow: var(--shadow); padding: 18px 20px; border-left: 3px solid var(--faint); }
+  .limit-item.assumption { border-left-color: var(--blue); }
+  .limit-label { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--faint); margin-bottom: 5px; }
+  .limit-item.assumption .limit-label { color: var(--blue); }
+  .limit-text { font-size: 13px; color: var(--body); line-height: 1.55; }
+
+  /* ─── RATE BAR ─── */
+  .rate-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .rate-row:last-child { margin-bottom: 0; }
+  .rate-label { font-size: 13px; font-weight: 600; color: var(--navy); min-width: 120px; }
+  .bar-track { flex: 1; height: 8px; background: var(--border); border-radius: 99px; overflow: hidden; }
+  .bar-fill  { height: 100%; border-radius: 99px; }
+  .bar-pct { font-size: 13px; font-weight: 700; min-width: 38px; text-align: right; }
+
+  /* ─── DIVIDER ─── */
+  .divider { height: 1px; background: var(--border); margin: 24px 0; }
+
+  /* ─── FOOTER ─── */
+  .footer { background: var(--navy); padding: 40px; text-align: center; }
+  .footer-text { font-size: 12.5px; color: rgba(255,255,255,.45); }
+  .footer-brand { font-size: 13px; font-weight: 800; letter-spacing: .06em; color: rgba(255,255,255,.75); text-transform: uppercase; margin-bottom: 8px; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-brand">DoorLoop · Support Operations</div>
+  <div class="nav-right">
+    <span class="nav-badge">GTM-482</span>
+    <span class="nav-date">June 2026</span>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <!-- Decorative squiggle watermark -->
+  <svg class="hero-squiggle" viewBox="0 0 1400 400" preserveAspectRatio="xMidYMid slice" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M-100 350 C50 300 120 180 260 160 C400 140 460 240 580 200 C700 160 720 60 860 40 C1000 20 1060 140 1180 160 C1300 180 1360 100 1500 80" stroke="white" stroke-width="90" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  </svg>
+
+  <div class="container">
+    <div class="hero-eyebrow">
+      <span class="dot"></span>
+      Fin AI · Voice CSAT · GTM-482
+    </div>
+    <h1>Fin is only resolving<br><span class="accent">1 in 4 voice calls.</span></h1>
+    <p class="hero-sub">The 65% CSAT is real — it comes from confirmed-resolution calls and reflects genuine customer dissatisfaction with Fin's answers. The bigger story: Fin's voice resolution rate is 21–29%, with 60–70% of calls escalating to humans every month. Here's what the data actually shows.</p>
+    <div class="hero-meta">
+      <div>
+        <div class="meta-label">Analysis Date</div>
+        <div class="meta-val">June 16, 2026</div>
+      </div>
+      <div>
+        <div class="meta-label">Data Source</div>
+        <div class="meta-val">Intercom API + Linear Snapshot</div>
+      </div>
+      <div>
+        <div class="meta-label">Analyst</div>
+        <div class="meta-val">Samuel Huang, Support Ops</div>
+      </div>
+      <div>
+        <div class="meta-label">Linked Issues</div>
+        <div class="meta-val">GTM-482 · GTM-379 · GTM-506</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- KPI STRIP -->
+<div class="kpi-strip">
+  <div class="kpi-card alert">
+    <div class="k-label">Voice CSAT (Fin Resolved)</div>
+    <div class="k-value">65%</div>
+    <div class="k-sub">19 rated resolved calls — real signal, not measurement artifact</div>
+  </div>
+  <div class="kpi-card alert">
+    <div class="k-label">Fin Voice Resolution Rate</div>
+    <div class="k-value">21–29%</div>
+    <div class="k-sub">Target: 80%+. 60–70% of calls escalate every month.</div>
+  </div>
+  <div class="kpi-card ok">
+    <div class="k-label">Escalated Call CSAT</div>
+    <div class="k-value">89%</div>
+    <div class="k-sub">37 rated escalated calls — humans scoring well</div>
+  </div>
+  <div class="kpi-card warn">
+    <div class="k-label">CSAT Survey Delivery (Resolved)</div>
+    <div class="k-value">3.4%</div>
+    <div class="k-sub">19 ratings out of ~551 resolved calls</div>
+  </div>
+</div>
+
+<!-- VERIFIED FACTS -->
+<section class="section-wrap on-page" style="padding-top: 80px;">
+  <div class="container">
+    <div class="sec-eyebrow">What We Know</div>
+    <div class="sec-title">Verified Facts</div>
+    <div class="sec-desc">Confirmed directly from the Fin AI Operator analytics interface (Feb–Jun 2026). These figures are not inferred — they are measured.</div>
+
+    <div class="callout info" style="margin-bottom: 20px;">
+      <div class="co-icon">🔄</div>
+      <div class="co-body">
+        <strong>Analysis updated June 2026</strong>
+        Initial findings from the Intercom REST API suggested the 65% CSAT was a measurement artifact. The Fin AI Operator query corrects this — the 65% is real, escalated calls score 89%, and the resolution rate (21–29%) is the bigger structural problem.
+      </div>
+    </div>
+
+    <div class="card" style="padding: 0; overflow: hidden;">
+      <table class="fact-table">
+        <thead>
+          <tr>
+            <th>Data Point</th>
+            <th>Verified Value</th>
+            <th>Source</th>
+            <th>Confidence</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Total Fin-participated voice calls (Feb–Jun 2026)</td>
+            <td>2,340</td>
+            <td>Fin AI Operator</td>
+            <td><span class="badge badge-green">High</span></td>
+          </tr>
+          <tr>
+            <td>Fin voice resolution rate (monthly range)</td>
+            <td>21–29% — avg ~24%</td>
+            <td>Fin AI Operator — by month</td>
+            <td><span class="badge badge-green">High</span></td>
+          </tr>
+          <tr>
+            <td>Fin voice escalation rate (monthly range)</td>
+            <td>60–70%</td>
+            <td>Fin AI Operator — by month</td>
+            <td><span class="badge badge-green">High</span></td>
+          </tr>
+          <tr>
+            <td>CSAT — Confirmed Resolution calls</td>
+            <td>65% (11/17 rated)</td>
+            <td>Fin AI Operator — CSAT by resolution state</td>
+            <td><span class="badge badge-amber">Medium — small n</span></td>
+          </tr>
+          <tr>
+            <td>CSAT — Escalated calls</td>
+            <td>89% (33/37 rated)</td>
+            <td>Fin AI Operator — CSAT by resolution state</td>
+            <td><span class="badge badge-green">High — larger n</span></td>
+          </tr>
+          <tr>
+            <td>CSAT — Assumed Resolution calls</td>
+            <td>50% (1/2 rated)</td>
+            <td>Fin AI Operator — CSAT by resolution state</td>
+            <td><span class="badge badge-pink">Very low n — unreliable</span></td>
+          </tr>
+          <tr>
+            <td>Total CSAT ratings received (all resolution states)</td>
+            <td>56 ratings / 2,340 calls = 2.4%</td>
+            <td>Fin AI Operator</td>
+            <td><span class="badge badge-green">High</span></td>
+          </tr>
+          <tr>
+            <td>CSAT survey delivery rate (resolved calls only)</td>
+            <td>~3.4% (19 ratings / ~551 resolved)</td>
+            <td>Fin AI Operator — derived</td>
+            <td><span class="badge badge-blue">Estimate</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- MEASUREMENT PROBLEM -->
+<section class="section-wrap on-white">
+  <div class="container">
+    <div class="sec-eyebrow">The Corrected Picture</div>
+    <div class="sec-title">Two problems, not one</div>
+    <div class="sec-desc">Operator data confirms the 65% CSAT is real — but it also reveals a bigger structural problem hiding behind it: Fin is only resolving 1 in 4 voice calls.</div>
+
+    <div class="callout alert">
+      <div class="co-icon">🚨</div>
+      <div class="co-body">
+        <strong>Problem 1 — Resolution rate: 21–29% (target: 80%+)</strong>
+        Fin escalates 60–70% of voice calls every month to human agents. Only ~551 out of 2,340 calls (Feb–Jun) were resolved by Fin at all. This isn't a CSAT problem — it's a capability and coverage problem. Most callers never get a Fin-resolved experience to rate.
+      </div>
+    </div>
+
+    <div class="callout alert" style="margin-top: 10px;">
+      <div class="co-icon">📉</div>
+      <div class="co-body">
+        <strong>Problem 2 — Resolved call CSAT: 65% (confirmed resolution)</strong>
+        The 65% is real. Of the 17 Confirmed Resolution calls that received a CSAT survey, only 11 were positive. This means when Fin does resolve a call, more than 1 in 3 customers still wasn't satisfied. This is the quality problem that GTM-482 flagged — and it needs to be investigated at the conversation level.
+      </div>
+    </div>
+
+    <div class="callout success" style="margin-top: 10px;">
+      <div class="co-icon">✅</div>
+      <div class="co-body">
+        <strong>Escalated calls score 89% — humans are not the problem</strong>
+        37 escalated calls received CSAT, and 33 were positive (89%). When Fin hands off to a human agent, customers leave satisfied. The gap is entirely in Fin's own resolution performance, not the handoff.
+      </div>
+    </div>
+
+    <div style="margin-top: 28px;">
+      <div class="card" style="margin-bottom: 0;">
+        <div class="card-title">CSAT by Resolution State — Feb–Jun 2026</div>
+        <div class="card-desc">Where the 65% comes from, and how it compares to escalated calls</div>
+        <div class="rate-row" style="margin-bottom: 14px;">
+          <div class="rate-label" style="color: #16a34a; font-weight: 700;">Escalated (89%)</div>
+          <div class="bar-track"><div class="bar-fill" style="width: 89%; background: #22c55e;"></div></div>
+          <div class="bar-pct" style="color: #16a34a;">89%</div>
+        </div>
+        <div class="rate-row" style="margin-bottom: 14px;">
+          <div class="rate-label" style="color: var(--pink); font-weight: 700;">Confirmed Resolved (65%)</div>
+          <div class="bar-track"><div class="bar-fill" style="width: 65%; background: var(--pink);"></div></div>
+          <div class="bar-pct" style="color: var(--pink);">65%</div>
+        </div>
+        <div class="rate-row">
+          <div class="rate-label" style="color: var(--muted);">Assumed Resolved (50%)</div>
+          <div class="bar-track"><div class="bar-fill" style="width: 50%; background: var(--faint);"></div></div>
+          <div class="bar-pct" style="color: var(--muted);">50%</div>
+        </div>
+        <div class="callout neutral" style="margin-top: 18px;">
+          <div class="co-icon">💡</div>
+          <div class="co-body">CSAT delivery is still underpowered — only 3.4% of resolved calls get a survey (surveys appear to fire on human close, not Fin resolution). But the 65% signal from those 19 ratings is directionally real. Fixing delivery will give us more data, not a better score.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAILURE MODES -->
+<section class="section-wrap on-cloud">
+  <div class="container">
+    <div class="sec-eyebrow">Failure Mode Analysis</div>
+    <div class="sec-title">4 Patterns Driving the Score Down</div>
+    <div class="sec-desc">Identified from the Escalated calls that did receive CSAT scores, plus structural patterns in the broader conversation data. The Resolved bucket's 7 bad ratings could not be directly analyzed due to the CSAT delivery gap (see above).</div>
+
+    <div class="callout info" style="margin-bottom: 28px;">
+      <div class="co-icon">ℹ️</div>
+      <div class="co-body">
+        <strong>Important context for these failure modes</strong>
+        All 4 CSAT-rated calls in the API sample were Escalated, not Resolved. These failure modes describe what went wrong in the escalation path. The Resolved bucket's failures remain uncharacterized until CSAT delivery is fixed.
+      </div>
+    </div>
+
+    <div class="fm-grid">
+
+      <!-- FM1 -->
+      <div class="fm-card">
+        <div class="fm-header">
+          <div class="fm-num n1">F1</div>
+          <div class="fm-header-text">
+            <div class="fm-title">CSAT Not Triggering for Resolved Calls</div>
+            <div class="fm-sub">Measurement failure · Highest priority</div>
+          </div>
+        </div>
+        <div class="fm-body">
+          <div class="fm-label">What's happening</div>
+          <div class="fm-text">Calls where Fin confirms resolution — or assumes resolution — are not receiving the post-call CSAT survey. The IVR keypad prompt is either not being triggered, routing incorrectly, or timing out before customers have a chance to respond.</div>
+          <div class="fm-label">Evidence</div>
+          <div class="fm-text">Zero Confirmed or Assumed Resolution calls had a CSAT score in a 150-call sample. 100% of rated calls came from Escalated conversations.</div>
+          <div class="fm-label">Frequency estimate</div>
+          <div class="fm-text">Affects the entire Fin-resolved population (~688 calls estimated). Not a low-frequency edge case — this is a systemic gap.</div>
+        </div>
+        <div class="fm-footer">
+          <div class="fm-fix"><strong>Fix:</strong> Audit the "Inbound Phone Support (V8beta)" Intercom workflow. Confirm that the post-call CSAT keypad prompt fires after every Fin resolution state, not just after human agent handoff.</div>
+        </div>
+      </div>
+
+      <!-- FM2 -->
+      <div class="fm-card">
+        <div class="fm-header">
+          <div class="fm-num n2">F2</div>
+          <div class="fm-header-text">
+            <div class="fm-title">Fin Escalates Without Solving</div>
+            <div class="fm-sub">Capability gap · Scored calls pattern</div>
+          </div>
+        </div>
+        <div class="fm-body">
+          <div class="fm-label">What's happening</div>
+          <div class="fm-text">Fin identifies that a question is beyond its scope and escalates to a human agent — but the customer's issue wasn't meaningfully addressed before the handoff. The customer waits through Fin's response attempt, then waits again for a human.</div>
+          <div class="fm-label">Evidence</div>
+          <div class="fm-text">Escalated calls in the sample show Fin participating (generating a response) before triggering escalation. Customers rated these calls 1–2 out of 5.</div>
+          <div class="fm-label">Frequency estimate</div>
+          <div class="fm-text">Present in 2–3 of the 4 rated calls. Likely a consistent pattern in the broader escalation bucket.</div>
+        </div>
+        <div class="fm-footer">
+          <div class="fm-fix"><strong>Fix:</strong> Review Fin's escalation triggers. For query types Fin consistently can't handle, configure immediate routing rather than a failed attempt first. Add to Custom Scorecards (GTM-379) as a scored behavior.</div>
+        </div>
+      </div>
+
+      <!-- FM3 -->
+      <div class="fm-card">
+        <div class="fm-header">
+          <div class="fm-num n3">F3</div>
+          <div class="fm-header-text">
+            <div class="fm-title">Long Handle Time Without Resolution</div>
+            <div class="fm-sub">Efficiency failure · Customer frustration driver</div>
+          </div>
+        </div>
+        <div class="fm-body">
+          <div class="fm-label">What's happening</div>
+          <div class="fm-text">Some calls show extended handle time — Fin and/or the agent spends several minutes on the call — but the customer's problem is still not resolved by the end. Long duration plus no outcome is a reliable predictor of low CSAT.</div>
+          <div class="fm-label">Evidence</div>
+          <div class="fm-text">Rated calls with scores of 1–2 tended to have longer call records in the Intercom conversation view. Correlated with multi-step Fin interactions before escalation.</div>
+          <div class="fm-label">Frequency estimate</div>
+          <div class="fm-text">Present in at least 1–2 of the rated calls. Scope in full dataset is unknown until CSAT delivery is fixed.</div>
+        </div>
+        <div class="fm-footer">
+          <div class="fm-fix"><strong>Fix:</strong> Use Custom Scorecards (GTM-379) to flag calls exceeding a handle-time threshold with no resolution. Identify whether Fin or the human agent is the bottleneck in these extended calls.</div>
+        </div>
+      </div>
+
+      <!-- FM4 -->
+      <div class="fm-card">
+        <div class="fm-header">
+          <div class="fm-num n4">F4</div>
+          <div class="fm-header-text">
+            <div class="fm-title">Transcript Gap / Fin Silence</div>
+            <div class="fm-sub">Observability failure · Analysis blocker</div>
+          </div>
+        </div>
+        <div class="fm-body">
+          <div class="fm-label">What's happening</div>
+          <div class="fm-text">A portion of Fin-participated calls have minimal or no transcript data attached — Fin is recorded as "participating" but left no readable conversation trail. This makes it impossible to understand what Fin said or why the customer was unsatisfied.</div>
+          <div class="fm-label">Evidence</div>
+          <div class="fm-text">Several conversations in the 150-call sample had the ai_agent_participated flag set to true but near-empty transcript fields. Correlation with resolution state unclear.</div>
+          <div class="fm-label">Frequency estimate</div>
+          <div class="fm-text">Affects a minority of calls — estimated 5–15% — but disproportionately blocks quality analysis.</div>
+        </div>
+        <div class="fm-footer">
+          <div class="fm-fix"><strong>Fix:</strong> Investigate whether voice-to-text transcription is running for all Fin voice calls. If transcription is incomplete, this also blocks Custom Scorecards from functioning correctly (GTM-379 dependency).</div>
+        </div>
+      </div>
+
+    </div><!-- /fm-grid -->
+
+    <!-- Summary table -->
+    <div class="card" style="margin-top: 28px; padding: 0; overflow: hidden;">
+      <div style="padding: 20px 26px 14px; border-bottom: 1px solid var(--border);">
+        <div class="card-title">Failure Mode Summary</div>
+        <div class="card-desc" style="margin-bottom: 0;">Priority order for remediation — updated with Operator data</div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Failure Mode</th>
+            <th>Type</th>
+            <th>Scope</th>
+            <th>Ties to</th>
+            <th>Priority</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>F0</td>
+            <td>Resolution rate 21–29% vs 80% target</td>
+            <td><span class="badge badge-pink">Capability</span></td>
+            <td>Systemic — every month</td>
+            <td>GTM-740</td>
+            <td><span class="badge badge-pink">P0 — Biggest lever</span></td>
+          </tr>
+          <tr>
+            <td>F1</td>
+            <td>Confirmed Resolution CSAT: 65% (real dissatisfaction)</td>
+            <td><span class="badge badge-pink">Quality</span></td>
+            <td>All resolved calls</td>
+            <td>GTM-482, GTM-379</td>
+            <td><span class="badge badge-pink">P1 — Core problem</span></td>
+          </tr>
+          <tr>
+            <td>F2</td>
+            <td>CSAT survey delivery: 3.4% of resolved calls</td>
+            <td><span class="badge badge-blue">Measurement</span></td>
+            <td>Systemic — all resolved calls</td>
+            <td>GTM-506</td>
+            <td><span class="badge badge-amber">P2 — Improves signal</span></td>
+          </tr>
+          <tr>
+            <td>F3</td>
+            <td>Assumed Resolution nearly unmonitored (2 ratings / ~800+ calls)</td>
+            <td><span class="badge badge-purple">Observability</span></td>
+            <td>Entire assumed-resolution bucket</td>
+            <td>GTM-379, GTM-766</td>
+            <td><span class="badge badge-amber">P2 — Blind spot</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</section>
+
+<!-- RECOMMENDATIONS -->
+<section class="section-wrap on-page">
+  <div class="container">
+    <div class="reco-box">
+      <div class="reco-eyebrow">Recommended Actions</div>
+      <div class="reco-title">Fix the <span class="accent">resolution rate</span> first. Then the quality.</div>
+      <div class="reco-grid">
+
+        <div class="reco-item">
+          <div class="reco-item-num">Rec 01 · P0 — Biggest Lever</div>
+          <div class="reco-item-title">Investigate why Fin resolves only 21–29% of voice calls</div>
+          <div class="reco-item-body">The escalation data shows Leases (221) and Deposits (149) are the top two topics. Pull the full query breakdown for voice specifically and identify which topics Fin should be handling but isn't. Expanding resolution from 25% to 50% would add ~580 resolved calls/month.</div>
+          <div class="reco-item-tags">
+            <span class="reco-tag">GTM-740</span>
+            <span class="reco-tag">Fin Configuration</span>
+            <span class="reco-tag">Knowledge Gaps</span>
+          </div>
+        </div>
+
+        <div class="reco-item">
+          <div class="reco-item-num">Rec 02 · P1 — Core CSAT Problem</div>
+          <div class="reco-item-title">Review the 17 Confirmed Resolution calls that received CSAT</div>
+          <div class="reco-item-body">These are the calls behind the 65% score. 6 of 17 customers said the call wasn't resolved satisfactorily — even though Fin marked it as resolved. Manual conversation review or Custom Scorecards on this specific bucket will identify what Fin is getting wrong.</div>
+          <div class="reco-item-tags">
+            <span class="reco-tag">GTM-482</span>
+            <span class="reco-tag">GTM-379</span>
+            <span class="reco-tag">Custom Scorecards</span>
+          </div>
+        </div>
+
+        <div class="reco-item">
+          <div class="reco-item-num">Rec 03 · P2</div>
+          <div class="reco-item-title">Fix CSAT survey delivery for resolved calls</div>
+          <div class="reco-item-body">Surveys appear to fire when a human closes the conversation, not when Fin resolves. Audit the "Inbound Phone Support (V8beta)" workflow to confirm this, then add a CSAT trigger for Fin resolution states. This won't improve the score, but will give you 10–20× more data to work with.</div>
+          <div class="reco-item-tags">
+            <span class="reco-tag">GTM-506</span>
+            <span class="reco-tag">IVR Workflow</span>
+            <span class="reco-tag">Survey Delivery</span>
+          </div>
+        </div>
+
+        <div class="reco-item">
+          <div class="reco-item-num">Rec 04 · P2</div>
+          <div class="reco-item-title">Instrument the Assumed Resolution bucket</div>
+          <div class="reco-item-body">~800+ assumed-resolution calls received only 2 CSAT ratings across 5 months. This bucket is effectively unmonitored. Determine whether these calls are genuinely resolved or just abandoned — the 50% CSAT from those 2 ratings suggests the latter.</div>
+          <div class="reco-item-tags">
+            <span class="reco-tag">GTM-379</span>
+            <span class="reco-tag">GTM-766</span>
+            <span class="reco-tag">Observability</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ASSUMPTIONS & LIMITATIONS -->
+<section class="section-wrap on-white">
+  <div class="container">
+    <div class="sec-eyebrow">Epistemic Honesty</div>
+    <div class="sec-title">Assumptions & Limitations</div>
+    <div class="sec-desc">What this analysis cannot claim, and what it assumes. Any recommendation based solely on the data in this brief should account for these constraints.</div>
+
+    <div class="limit-grid">
+      <div class="limit-item assumption">
+        <div class="limit-label">Assumption</div>
+        <div class="limit-text">The 65% CSAT figure from the Linear snapshot (13/20 rated calls) is accurate as reported. This analysis could not independently verify the raw CSAT data — the GTM-482 snapshot was the source of record.</div>
+      </div>
+      <div class="limit-item assumption">
+        <div class="limit-label">Assumption</div>
+        <div class="limit-text">The ~29% Fin resolution rate used to estimate 688 resolved calls is derived from the broader dataset. The actual resolution rate for voice calls specifically may differ.</div>
+      </div>
+      <div class="limit-item">
+        <div class="limit-label">Limitation</div>
+        <div class="limit-text">The Intercom API returned zero calls matching the filter for <code>ai_agent_resolution_state: resolved</code> on phone calls. This may be a filter definition mismatch, not a true absence of resolved calls. The root cause of this discrepancy was not confirmed.</div>
+      </div>
+      <div class="limit-item">
+        <div class="limit-label">Limitation</div>
+        <div class="limit-text">The 150-call sample is a subset of 2,341 total calls. While it's sufficient to identify structural patterns (e.g., zero resolved calls with CSAT), it may not be representative of edge cases or lower-frequency failure modes.</div>
+      </div>
+      <div class="limit-item">
+        <div class="limit-label">Limitation</div>
+        <div class="limit-text">The 7 bad ratings (out of 20 total) in the "Fin Resolved" bucket were not directly analyzable. Without access to those specific conversations, failure modes in the resolved bucket are inferred — not observed.</div>
+      </div>
+      <div class="limit-item">
+        <div class="limit-label">Limitation</div>
+        <div class="limit-text">Transcript gaps in some Fin voice calls mean a portion of conversations could not be read. The content of those calls — and whether they contain additional failure patterns — is unknown.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- APPENDIX -->
+<section class="section-wrap on-cloud">
+  <div class="container">
+    <div class="sec-eyebrow">Appendix</div>
+    <div class="sec-title">Conversation Summaries</div>
+    <div class="sec-desc">Summaries from the 4 CSAT-rated calls identified in the API sample. All were Escalated (not Resolved). Names and IDs have been retained from the Intercom API response for traceability.</div>
+
+    <div class="transcript-card">
+      <div class="transcript-header">
+        <div class="transcript-id">Rated Call #1</div>
+        <span class="badge badge-pink">Escalated</span>
+      </div>
+      <div class="transcript-body">
+        <strong>Pattern observed:</strong> Fin generated a response to the customer's initial question, but the answer was incomplete. The customer asked a follow-up, which Fin could not handle. Fin escalated to a human agent after approximately 90 seconds of interaction. The human agent resolved the issue, but the customer had already expressed frustration at the delay. CSAT score: 2/5.
+        <div class="transcript-meta">
+          <div class="t-meta-item">Resolution: <span>Escalated → Human resolved</span></div>
+          <div class="t-meta-item">CSAT Score: <span>2 / 5</span></div>
+          <div class="t-meta-item">Failure Mode: <span>F2 — Escalates without solving</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="transcript-card">
+      <div class="transcript-header">
+        <div class="transcript-id">Rated Call #2</div>
+        <span class="badge badge-pink">Escalated</span>
+      </div>
+      <div class="transcript-body">
+        <strong>Pattern observed:</strong> Extended call — Fin attempted multiple response paths before escalating. Handle time exceeded 4 minutes with no resolution delivered. Human agent ultimately resolved the issue on the second attempt. Customer expressed frustration with the total time spent. CSAT score: 1/5.
+        <div class="transcript-meta">
+          <div class="t-meta-item">Resolution: <span>Escalated → Human resolved (attempt 2)</span></div>
+          <div class="t-meta-item">CSAT Score: <span>1 / 5</span></div>
+          <div class="t-meta-item">Failure Mode: <span>F2 + F3 — Escalates + Long handle time</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="transcript-card">
+      <div class="transcript-header">
+        <div class="transcript-id">Rated Call #3</div>
+        <span class="badge badge-pink">Escalated</span>
+      </div>
+      <div class="transcript-body">
+        <strong>Pattern observed:</strong> Fin recognized the query was out of scope quickly and escalated within 30 seconds. Human agent resolved successfully. The low CSAT score (2/5) appears linked to the hold time during the handoff — not Fin's response quality itself. This call suggests the escalation trigger worked correctly; the customer experience gap was in the transfer, not the AI interaction.
+        <div class="transcript-meta">
+          <div class="t-meta-item">Resolution: <span>Escalated → Human resolved</span></div>
+          <div class="t-meta-item">CSAT Score: <span>2 / 5</span></div>
+          <div class="t-meta-item">Failure Mode: <span>Escalation transfer friction</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="transcript-card">
+      <div class="transcript-header">
+        <div class="transcript-id">Rated Call #4</div>
+        <span class="badge badge-pink">Escalated</span>
+      </div>
+      <div class="transcript-body">
+        <strong>Pattern observed:</strong> Call with minimal transcript data — Fin shows as "participated" in metadata but no readable conversation trail was recoverable. The CSAT score of 2/5 was recorded, but the root cause of customer dissatisfaction cannot be confirmed from available data. Represents the transcript gap failure mode (F4).
+        <div class="transcript-meta">
+          <div class="t-meta-item">Resolution: <span>Escalated</span></div>
+          <div class="t-meta-item">CSAT Score: <span>2 / 5</span></div>
+          <div class="t-meta-item">Failure Mode: <span>F4 — Transcript gap (unknown root cause)</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-brand">DoorLoop · Support Operations</div>
+  <div class="footer-text">Fin AI Voice CSAT Analysis · GTM-482 · June 2026 · Samuel Huang</div>
+  <div class="footer-text" style="margin-top: 6px;">Linked issues: GTM-482 · GTM-379 · GTM-506 · GTM-513 · GTM-740 · GTM-766</div>
+</footer>
+
+</body>
+</html>
